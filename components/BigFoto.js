@@ -13,30 +13,23 @@ export default class BigFoto extends Component {
         // console.log(this.props.route.params.data.id)
     }
     deleteOne = async () => {
-        // let o = [this.props.route.params.data.id]
-        // console.log(o)
-        console.log("DELETE")
-        // console.log(this.props.navigation, 'oqoqoq')
         let obj = [this.props.route.params.data.id]
 
         const delete_album = await MediaLibrary.createAlbumAsync('selected', obj.pop(), false) // false==move, true==copy to the new album
         if (obj.length > 0)
             await MediaLibrary.addAssetsToAlbumAsync(obj, delete_album.id, false) // false==move, true==copy to the new album
-        // console.log(this.props.navigation, 'llelelel')
-        if (await MediaLibrary.deleteAlbumsAsync([delete_album.id], true))
-            this.props.navigation.navigate('Main', { refresh: true, deleted: this.props.route.params.data.id })
-        // this.props.navigation.navigate('Main', { refresh: true })
-        //true==delete album with files (needed for iOS only, android is always true)
-        // console.log(resp)
-        // this.props.navigation.navigate("Galery")
-        // if (resp === true) {
-        // alert("OK")
-        // } else {
-        // nie udało się usunąć
-        // }
+
+        if (await MediaLibrary.deleteAlbumsAsync([delete_album.id], true)) {
+            this.delAndGoBack();
+        }
+
+    }
+    delAndGoBack = () => {
+        this.props.route.params.doit();
+        this.props.route.navigate('Galery');
     }
     shareIt = () => {
-        Sharing.shareAsync(this.props.route.params.data.uri)
+        Sharing.shareAsync(this.props.route.params.data.uri);
     }
     render() {
         // console.log(this.props.route.params.data)

@@ -15,96 +15,96 @@ export default class Galery extends Component {
         };
         this.max_column = 5;
     }
+    /**
+     * placeholder
+     */
     placeholder = () => { alert('TODO: zamien tutaj funckje!') }
+    //
     selectFoto = (id) => {
         this.props.navigation.navigate("BigFoto", {
             data: this.state.photosloaded.find(el => el.id == id),
+            doit: this.handleDelete
         })
     }
+    /**
+     * Funkcja odświeża listę zdjęć
+     */
+    refreshTheAllFotos = async () => {
+        let album = await MediaLibrary.getAlbumAsync("EXPO")
 
-
-    componentDidMount = async () => {
-        let { status } = await MediaLibrary.requestPermissionsAsync();
-        console.log("toja")
-        if (status !== 'granted') {
-            alert('brak uprawnień do czytania image-ów z galerii');
-        } else this.setState({ granted_media: true })
-
+        console.log(album, 'gal')
         let obj = await MediaLibrary.getAssetsAsync({
             first: 100,           // ilość pobranych assetów
-            mediaType: 'photo'    // typ pobieranych danych, photo jest domyślne
+            mediaType: 'photo',    // typ pobieranych danych, photo jest domyślne
+            album: album
         })
-        // alert(obj.assets.length)
         obj = obj.assets;
         if (this.props.route.params && this.props.route.params.deleted) {
             obj.splice(obj.findIndex(el => el.id == this.props.route.params.deleted), 1)
         }
-        // alert(JSON.stringify(obj.assets, null, 5))
         this.setState({ photosloaded: obj })
+        return true;
     }
-    cnsMe = () => {
-        console.log(this.state.photosloaded)
+    // nie wykonuj tego kilka razy!!!
+    componentDidMount = async () => {
+        let { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+            alert('brak uprawnień do czytania image-ów z galerii');
+        } else this.setState({ granted_media: true });
+        this.refreshTheAllFotos();
     }
+
     handleCamera = () => {
-        this.props.navigation.navigate("Kamera", { doit: this.componentDidMount });
+        this.props.navigation.navigate("Kamera", { doit: this.refreshTheAllFotos });
     }
+    /**
+     * Żeby skrócić ilość kodu
+     */
+    toastItQuick = (string, position) => {
+        ToastAndroid.showWithGravity(
+            string,
+            ToastAndroid.SHORT,
+            position ? ToastAndroid.BOTTOM : ToastAndroid.CENTER
+        );
+    }
+    /**
+    * getSelected - funkcja sprawdzająca, czy chcemy odznaczyć czy zaznaczyć
+    */
     getSelected = (id) => {
-        // alert("getselected!!!")
         let blk = [...this.state.selected]
         if (this.state.selected.indexOf(id) == -1) {
             blk = [...this.state.selected, id]
-            ToastAndroid.showWithGravity(
-                'zaznaczono',
-                ToastAndroid.SHORT,
-                ToastAndroid.CENTER
-            );
-            // alert(JSON.stringify(blk))
+            this.toastItQuick('ZAZNACZONO')
         } else {
             blk = [...this.state.selected]
             blk.splice(blk.indexOf(id), 1);
-            ToastAndroid.showWithGravity(
-                'odznaczono',
-                ToastAndroid.SHORT,
-                ToastAndroid.CENTER
-            );
-            // alert(JSON.stringify(blk))
+            this.toastItQuick('ODZNACZONO')
         }
         this.setState({
             selected: blk,
         })
         return 0;
     }
+    /**
+     * USUWA PLIKI
+     */
     handleDelete = async () => {
-        if (this.state.selected.length == 0) {
-            ToastAndroid.showWithGravity(
-                'nic nie jest zaznaczone!',
-                ToastAndroid.SHORT,
-                ToastAndroid.CENTER
-            );
+        if (this.state.selected.length == 0) { // jeżeli nic nie jest zaznaczone, powiadom
+            this.toastItQuick('BRAK ZAZNACZENIA')
             return false;
         }
-        let o = [...this.state.selected]
+        // musimy utworzyć album z zaznaczonymi, aby potem przenieść te pliki z głównego albumu
         const delete_album = await MediaLibrary.createAlbumAsync('selected', this.state.selected.pop(), false) // false==move, true==copy to the new album
-        if (this.state.selected.length > 0) {
-            await MediaLibrary.addAssetsToAlbumAsync(this.state.selected, delete_album.id, false) // false==move, true==copy to the new album
-        }
+        await MediaLibrary.addAssetsToAlbumAsync(this.state.selected, delete_album.id, false) // false==move, true==copy to the new album
+        // usuń
         const resp = await MediaLibrary.deleteAlbumsAsync([delete_album.id], true) //true==delete album with files (needed for iOS only, android is always true)
-
+        // odśwież
         if (resp === true) {
-            // alert("OK")
-            // this.props.navigation.navigate("Main", { refresh: true });
-            this.componentDidMount();
-            // let blok = [...this.state.photosloaded]
-            // // console.log(blok, "o0o", o)
-            // o.forEach(el => {
-            //     blok.splice(blok.findIndex(bl => bl.id == el), 1);
-            // })
-            // this.setState({
-            //     photosloaded: blok,
-            // })
+            this.refreshTheAllFotos();
         } else {
-            // nie udało się usunąć
+            return false;
         }
+        return true;
     }
     render() {
 
@@ -147,10 +147,7 @@ export default class Galery extends Component {
 
                                 }}
                                 contentContainerStyle={{
-                                    // alignItems: 'center',
                                     alignSelf: 'center'
-                                    // alignContent: 'space-around',
-
                                 }}
                                 numColumns={(this.state.gird_list) ? /*'row'*/ 1 : /*'column'*/ this.max_column}
                                 key={(this.state.gird_list) ? /*'row'*/ 1 : /*'column'*/ this.max_column}

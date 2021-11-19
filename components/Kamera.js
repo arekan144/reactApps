@@ -12,20 +12,24 @@ export default class Kamera extends Component {
         };
     }
     componentDidMount = async () => {
-
         let { status } = await Camera.requestCameraPermissionsAsync();
         this.setState({ hasCameraPermission: status == 'granted' });
         BackHandler.addEventListener("hardwareBackPress", this.handleBackPress);
     }
     makeFoto = async () => {
+
         if (this.camera) {
+            const album = await MediaLibrary.getAlbumAsync("EXPO");
+            console.log(album, 'fot')
             let foto = await this.camera.takePictureAsync();
-            let asset = await MediaLibrary.createAssetAsync(foto.uri); // domyślnie zapisuje w folderze DCIM
-            ToastAndroid.showWithGravity(
-                'zdjecie',
-                ToastAndroid.SHORT,
-                ToastAndroid.BOTTOM
-            );
+            const asset = await MediaLibrary.createAssetAsync(foto.uri);
+            if (album == null) {
+                await MediaLibrary.createAlbumAsync('EXPO', asset, false);
+            } else {
+                await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+            }
+            // let asset = await MediaLibrary.createAssetAsync(foto.uri); // domyślnie zapisuje w folderze DCIM
+
             // alert(JSON.stringify(asset, null, 4))
 
         }
@@ -41,13 +45,13 @@ export default class Kamera extends Component {
         //tutaj wywołanie funkcji odświeżającej gallery, przekazanej w props-ach
         //...
         //powrót do ekranu poprzedniego
-
+        this.props.route.params.doit();
         this.props.navigation.goBack()
         return true;
     }
     componentWillUnmount = () => {
         BackHandler.removeEventListener("hardwareBackPress", this.handleBackPress);
-        this.props.route.params.doit();
+
     }
     render() {
         const { hasCameraPermission } = this.state; // podstawienie zmiennej ze state
@@ -66,8 +70,8 @@ export default class Kamera extends Component {
                         type={this.state.type}>
                         <View style={{ flex: 1, flexDirection: 'row', alignSelf: 'flex-end', justifyContent: 'center' }}>
                             {/* tutaj wstaw buttony do obsługi kamery, które widać na filmie*/}
-                            <SpecialButton mnoznik={0.25} obrazek={'./odw.png'} onPress={this.chngFoto} />
-                            <SpecialButton mnoznik={0.45} obrazek={'./plus.png'} onPress={this.makeFoto} />
+                            <SpecialButton mnoznik={0.15} obrazek={'./odw.png'} onPress={this.chngFoto} />
+                            <SpecialButton mnoznik={0.25} obrazek={'./plus.png'} onPress={this.makeFoto} />
                         </View>
                     </Camera>
                 </View>
