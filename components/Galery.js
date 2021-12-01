@@ -3,6 +3,7 @@ import { View, Text, Dimensions, ActivityIndicator, FlatList, ToastAndroid } fro
 import MyButton from './MyButton';
 import * as MediaLibrary from "expo-media-library";
 import FotoItem from './FotoItem';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class Galery extends Component {
     constructor(props) {
@@ -23,25 +24,36 @@ export default class Galery extends Component {
     selectFoto = (id) => {
         this.props.navigation.navigate("BigFoto", {
             data: this.state.photosloaded.find(el => el.id == id),
-            doit: this.handleDelete
+            doit: this.refreshTheAllFotos
         })
     }
     /**
      * Funkcja odświeża listę zdjęć
      */
     refreshTheAllFotos = async () => {
-        let album = await MediaLibrary.getAlbumAsync("EXPO")
-
-        console.log(album, 'gal')
-        let obj = await MediaLibrary.getAssetsAsync({
-            first: 100,           // ilość pobranych assetów
-            mediaType: 'photo',    // typ pobieranych danych, photo jest domyślne
-            album: album
-        })
-        obj = obj.assets;
+        console.log("refresh")
+        let album = await MediaLibrary.getAlbumAsync("expo")
+        console.log('album', album);
+        // if (album == null) {
+        //     await MediaLibrary.createAssetAsync("");
+        //     await MediaLibrary.createAlbumAsync('expo');
+        // }
+        // console.log(album, 'gal')
+        let obj;
+        if (album != null) {
+            obj = await MediaLibrary.getAssetsAsync({
+                first: 100,           // ilość pobranych assetów
+                mediaType: 'photo',    // typ pobieranych danych, photo jest domyślne
+                album: album
+            })
+            obj = obj.assets;
+        } else {
+            obj = []
+        }
         if (this.props.route.params && this.props.route.params.deleted) {
             obj.splice(obj.findIndex(el => el.id == this.props.route.params.deleted), 1)
         }
+
         this.setState({ photosloaded: obj })
         return true;
     }
@@ -89,6 +101,7 @@ export default class Galery extends Component {
      * USUWA PLIKI
      */
     handleDelete = async () => {
+        console.log("USUWANIE")
         if (this.state.selected.length == 0) { // jeżeli nic nie jest zaznaczone, powiadom
             this.toastItQuick('BRAK ZAZNACZENIA')
             return false;
@@ -97,13 +110,11 @@ export default class Galery extends Component {
         const delete_album = await MediaLibrary.createAlbumAsync('selected', this.state.selected.pop(), false) // false==move, true==copy to the new album
         await MediaLibrary.addAssetsToAlbumAsync(this.state.selected, delete_album.id, false) // false==move, true==copy to the new album
         // usuń
-        const resp = await MediaLibrary.deleteAlbumsAsync([delete_album.id], true) //true==delete album with files (needed for iOS only, android is always true)
-        // odśwież
-        if (resp === true) {
+        await MediaLibrary.deleteAlbumsAsync([delete_album.id], true).then((_) => {
             this.refreshTheAllFotos();
-        } else {
-            return false;
-        }
+        }) //true==delete album with files (needed for iOS only, android is always true)
+        // odśwież
+        this.refreshTheAllFotos();
         return true;
     }
     render() {

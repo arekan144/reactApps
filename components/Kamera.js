@@ -3,6 +3,8 @@ import { View, Text, BackHandler, ToastAndroid } from 'react-native';
 import { Camera } from "expo-camera";
 import SpecialButton from './SpecialButton';
 import * as MediaLibrary from "expo-media-library";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export default class Kamera extends Component {
     constructor(props) {
         super(props);
@@ -19,13 +21,15 @@ export default class Kamera extends Component {
     makeFoto = async () => {
 
         if (this.camera) {
-            const album = await MediaLibrary.getAlbumAsync("EXPO");
-            console.log(album, 'fot')
+            const album = await MediaLibrary.getAlbumAsync("expo");
+            // console.log(album, 'fot')
             let foto = await this.camera.takePictureAsync();
             const asset = await MediaLibrary.createAssetAsync(foto.uri);
+            // console.log(album, asset)
             if (album == null) {
-                await MediaLibrary.createAlbumAsync('EXPO', asset, false);
+                await MediaLibrary.createAlbumAsync('expo', asset, false);
             } else {
+                // console.log("???")
                 await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
             }
             // let asset = await MediaLibrary.createAssetAsync(foto.uri); // domyślnie zapisuje w folderze DCIM
@@ -41,17 +45,21 @@ export default class Kamera extends Component {
                 : Camera.Constants.Type.back,
         });
     }
+    handleDoIt = () => {
+        console.log("DO IT", this.props.route.params.doit)
+        this.props.route.params.doit();
+    }
     handleBackPress = () => {
         //tutaj wywołanie funkcji odświeżającej gallery, przekazanej w props-ach
         //...
         //powrót do ekranu poprzedniego
-        this.props.route.params.doit();
+        this.handleDoIt();
         this.props.navigation.goBack()
         return true;
     }
     componentWillUnmount = () => {
+        this.handleDoIt();
         BackHandler.removeEventListener("hardwareBackPress", this.handleBackPress);
-
     }
     render() {
         const { hasCameraPermission } = this.state; // podstawienie zmiennej ze state

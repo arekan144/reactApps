@@ -3,6 +3,7 @@ import { View, Text, ImageBackground, Dimensions, ActivityIndicator } from 'reac
 import * as Sharing from 'expo-sharing';
 import MyButton from './MyButton';
 import * as MediaLibrary from "expo-media-library";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class BigFoto extends Component {
     constructor(props) {
@@ -20,13 +21,14 @@ export default class BigFoto extends Component {
             await MediaLibrary.addAssetsToAlbumAsync(obj, delete_album.id, false) // false==move, true==copy to the new album
 
         if (await MediaLibrary.deleteAlbumsAsync([delete_album.id], true)) {
+            // console.log(this.props.route.params.doit)c
             this.delAndGoBack();
         }
 
     }
     delAndGoBack = () => {
         this.props.route.params.doit();
-        this.props.route.navigate('Galery');
+        this.props.navigation.goBack()
     }
     shareIt = () => {
         Sharing.shareAsync(this.props.route.params.data.uri);
