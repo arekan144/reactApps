@@ -5,7 +5,8 @@ export default class SpecialButton extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            obrazek: this.props.obrazek
+            obrazek: this.props.obrazek,
+            pos: 0,
         };
 
     }
@@ -34,12 +35,12 @@ export default class SpecialButton extends Component {
                     style={{
 
                         alignSelf: 'center',
-                        width: Dimensions.get('window').width * 0.3,
-                        height: Dimensions.get('window').width * 0.3,
+                        // width: Dimensions.get('window').width * 0.3,
+                        // height: Dimensions.get('window').width * 0.3,
 
                     }}
 
-                    source={(this.props.obrazek == './plus.png') ? require('./plus.png') : require('./odw.png')}
+                    source={(this.props.obrazek == './plus.png') ? require('./plus.png') : ((this.props.obrazek == './stn.png') ? require('./stn.png') : require('./odw.png'))}
                 />
 
             </TouchableOpacity>

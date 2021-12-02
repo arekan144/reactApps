@@ -4,7 +4,7 @@ import MyButton from './MyButton';
 import * as MediaLibrary from "expo-media-library";
 import FotoItem from './FotoItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import ViewAnimated from './ViewAnimated';
 export default class Galery extends Component {
     constructor(props) {
         super(props);
@@ -111,6 +111,7 @@ export default class Galery extends Component {
         await MediaLibrary.addAssetsToAlbumAsync(this.state.selected, delete_album.id, false) // false==move, true==copy to the new album
         // usuń
         await MediaLibrary.deleteAlbumsAsync([delete_album.id], true).then((_) => {
+            console.log("refresh after del")
             this.refreshTheAllFotos();
         }) //true==delete album with files (needed for iOS only, android is always true)
         // odśwież
@@ -143,6 +144,7 @@ export default class Galery extends Component {
                         onPress={this.handleDelete}
                     />
                 </View>
+
                 {this.state.granted_media ?
                     <View style={{
                         flexWrap: 'wrap',

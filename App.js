@@ -1,6 +1,6 @@
 import * as React from 'react';
 // import { View, Text } from 'react-native';
-import { LogBox } from 'react-native';
+import { Dimensions, LogBox } from 'react-native';
 
 LogBox.ignoreLogs(['Non-serializable ']);
 import { NavigationContainer } from '@react-navigation/native';
@@ -70,7 +70,8 @@ export default function App() {
           options={{
             title: 'Kamera',
             headerStyle: {
-              backgroundColor: '#388E3C',
+              backgroundColor: '#8BC34A',
+              // height: Dimensions.get('screen').height / 1
               // height: 30
             },
             headerTintColor: '#ffffff',

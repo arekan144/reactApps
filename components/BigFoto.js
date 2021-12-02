@@ -11,7 +11,7 @@ export default class BigFoto extends Component {
         this.state = {
             loading: true,
         };
-        // console.log(this.props.route.params.data.id)
+        console.log(this.props.route.params.data)
     }
     deleteOne = async () => {
         let obj = [this.props.route.params.data.id]
@@ -61,8 +61,11 @@ export default class BigFoto extends Component {
                             color="#ff0000" /> :
                         null}
                     {/* <View style={{ backgroundColor: 'black' }}><Text style={{ color: 'white' }} >{this.props.id}</Text></View> */}
+
                 </ImageBackground>
+                <Text style={{ color: 'black', alignSelf: 'center' }} >{this.props.route.params.data.height} x {this.props.route.params.data.width} </Text>
                 <View style={{ alignSelf: 'center', flexDirection: 'row', justifyContent: 'space-evenly' }}>
+
                     <MyButton
                         txtColor="black"
                         bgColor=""
