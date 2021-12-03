@@ -5,7 +5,6 @@ import { Camera } from "expo-camera";
 import SpecialButton from './SpecialButton';
 import * as MediaLibrary from "expo-media-library";
 import RadioGroup from './RadioGroup';
-import MyButton from './MyButton';
 
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
