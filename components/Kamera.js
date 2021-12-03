@@ -156,14 +156,15 @@ export default class Kamera extends Component {
                     <Camera
                         ref={ref => {
                             this.camera = ref; // Uwaga: referencja do kamery używana później
-                            // this.getSizes();
                         }}
-                        style={{ flex: 1, flexDirection: 'row', aspectRatio: this.ratios2[this.state.ratio] }}
                         onCameraReady={() => { this.getSizes() }}
+                        style={{ flex: 1, flexDirection: 'row', aspectRatio: this.ratios2[this.state.ratio] }}
+                        /*OPCJE KAMERY*/
                         ratio={this.ratios[this.state.ratio]}
                         whiteBalance={this.wbs[this.state.wb]}
                         pictureSize={this.state.sizes[this.state.ratio][this.state.size]}
                         flashMode={this.fms[this.state.fm]}
+
                     >
                         <Animated.View
                             style={[
